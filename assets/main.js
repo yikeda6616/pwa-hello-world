@@ -109,4 +109,27 @@ elShowNotification.addEventListener('click', () => {
   showNotification('Hello!');
 });
 
+async function getPushEndpoint() {
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.getSubscription();
+  if (sub) {
+    return sub.endpoint;
+  }
+
+  const newSub = await reg.pushManager.subscribe({
+    userVisibleOnly: true
+  });
+  // eslint-disable-next-line no-console
+  console.log('End point (new)', newSub.endpoint);
+  return newSub.endpoint;
+}
+
+getPushEndpoint().then(endpoint => {
+  const serverKey = 'xxx';
+  const command = `curl "${endpoint}" \
+  --request POST --header "TTL: 60" --header "Content-Length: 0" \
+  --header "Authorization: key=${serverKey}"`;
+  console.log(command);
+});
+
 main();

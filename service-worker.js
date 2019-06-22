@@ -108,3 +108,8 @@ sw.addEventListener('notificationclick', event => {
     notification.close();
   }
 });
+
+sw.addEventListener('push', event => {
+  const p = showNotification('Pushed!');
+  event.waitUntil(p);
+});
