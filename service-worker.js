@@ -10,12 +10,19 @@ async function updateCache() {
 
 sw.addEventListener('install', event => {
   console.log('[SW] Install');
-  const p = updateCache();
+  const p = updateCache().then(async () => {
+    const clients = await sw.clients.matchAll({ includeUncontrolled: true });
+    clients.forEach(client => {
+      const message = { type: 'sw/install' };
+      client.postMessage(message);
+    });
+  });
   event.waitUntil(p);
 });
 
 sw.addEventListener('activate', event => {
   console.log('[SW] Activate');
+  sw.clients.claim();
 });
 
 /**
@@ -34,5 +41,30 @@ sw.addEventListener('fetch', event => {
   if (url.pathname === '/pwa-hello-world/') {
     const p = loadCache(url.pathname);
     event.respondWith(p);
+  }
+});
+
+setInterval(async () => {
+  const text = 'SW#1';
+  console.log(`[SW] ${text}`);
+  const clients = await sw.clients.matchAll();
+  clients.forEach(client => {
+    client.postMessage({
+      text,
+      type: 'ping'
+    });
+  });
+}, 1000);
+
+sw.addEventListener('message', async event => {
+  const message = event.data;
+
+  switch (message.type) {
+    case 'sw/skipWaiting': {
+      sw.skipWaiting();
+      break;
+    }
+
+    default: // do nothing;
   }
 });
