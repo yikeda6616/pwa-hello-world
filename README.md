@@ -1,3 +1,3 @@
 # Hello PWA World
 
-https://ginpei.github.io/pwa-hello-world/
+https://yikeda6616.github.io/pwa-hello-world/
