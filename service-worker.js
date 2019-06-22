@@ -45,7 +45,7 @@ sw.addEventListener('fetch', event => {
 });
 
 setInterval(async () => {
-  const text = 'SW#1';
+  const text = 'SW#2';
   console.log(`[SW] ${text}`);
   const clients = await sw.clients.matchAll();
   clients.forEach(client => {
@@ -66,5 +66,45 @@ sw.addEventListener('message', async event => {
     }
 
     default: // do nothing;
+  }
+});
+
+/**
+ * @param {string} body
+ */
+function showNotification(body) {
+  const title = 'PWA';
+  /** @type {NotificationOptions} */
+  const options = {
+    actions: [
+      {
+        action: 'explore',
+        title: 'Explore this new world'
+      },
+      {
+        action: 'close',
+        title: 'Close notification'
+      }
+    ],
+    body,
+    icon: '/pwa-hello-world/assets/gpui/icon-512.png'
+  };
+  sw.registration.showNotification(title, options);
+}
+
+sw.addEventListener('activate', event => {
+  console.log('[SW] Activate');
+  sw.clients.claim();
+  showNotification('Activated!');
+});
+
+sw.addEventListener('notificationclick', event => {
+  const { action, notification } = event;
+
+  if (action === 'close') {
+    notification.close();
+  } else {
+    sw.clients.openWindow('http://www.example.com');
+    notification.close();
   }
 });
